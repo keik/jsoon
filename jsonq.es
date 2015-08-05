@@ -11,14 +11,19 @@ function jsonq (json) {
     return new jsonq(json);
   }
 
-  this._json = json;
+  this._root = json;
+  this._current = json;
   return this;
+}
+
+function traverse () {
 }
 
 jsonq.fn = jsonq.prototype = {
 
   root: function () {
-    return null;
+    this._current = this._root;
+    return this;
   },
 
   parent: function () {
@@ -42,7 +47,7 @@ jsonq.fn = jsonq.prototype = {
   },
 
   obj: function () {
-    return null;
+    return this._current;
   },
 
   keys: function () {
