@@ -3,7 +3,9 @@
 'use strict';
 
 const DEV = true;
-const str = JSON.stringify;
+
+var str = JSON.stringify;
+var parse = JSON.parse;
 
 module.exports = jsoon;
 
@@ -39,17 +41,15 @@ jsoon.fn = jsoon.prototype = {
   },
 
   find: function (key) {
-
-
     let path = [];
     _traverse(this._root/* tmp */, function (k, v, acc = []) {
-      acc = JSON.parse(str(acc));
+      acc = parse(str(acc));
       if (typeof v === 'object') {
         acc.push(k);
       }
       if (k === key) {
         acc.push(k);
-        path.push(JSON.parse(str(acc)));
+        path.push(parse(str(acc)));
         acc = [];
       }
       return acc;
@@ -81,18 +81,15 @@ jsoon.fn = jsoon.prototype = {
       return this._root;
     // console.log(idt(2), '#val', str(this._current));
     return _resolveAll.apply(this, [this._current]);
-  },
-
-  _dump: function () {
-    return this;
   }
+
 };
 
 function _traverse (obj, fn, acc) {
   for (let k in obj) {
     if (obj.hasOwnProperty(k)) {
       let v = obj[k];
-      var ret = fn(k, v, acc);
+      let ret = fn(k, v, acc);
       if (typeof v === 'object') {
         _traverse(v, fn, ret);
       }
@@ -110,22 +107,13 @@ function _resolve (path, obj) {
 }
 
 function _resolveAll (paths) {
-  console.log(idt(1 + 2), '#_resolveAll', str(paths));
+  // console.log(idt(1 + 2), '#_resolveAll', str(paths));
   let ret = [];
   for (let i = 0, len = paths.length; i < len; i++) {
     ret.push(_resolve(paths[i], this._root));
   }
   return ret;
 }
-
-
-function idt (lvl) {
-  return new Array(lvl).join('  ');
-}
-
-var toString = function () {
-  return Object.prototype.toString.apply(arguments[0]);
-};
 
 if (DEV) {
   jsoon._resolve = _resolve;

@@ -100,8 +100,7 @@ describe('`find` method', function () {
       var $$obj = jsoon(obj);
 
       assert.sameDeepMembers($$obj.find('name').val(),
-                             ['Alice', 'Bob', 'Carol', 'Dave', 'Elen', 'Fred', 'Greg']
-      );
+                             ['Alice', 'Bob', 'Carol', 'Dave', 'Elen', 'Fred', 'Greg']);
     });
   });
 });
@@ -178,43 +177,43 @@ describe('inner method', function () {
   });
 });
 
-describe('`siblings` method', function () {
-  describe('returns siblings of each object in current', function () {
-    it('x', function () {
-      var obj = {a: 1},
-          $$obj = jsoon(obj);
-
-      assert.equal($$obj.find(obj).siblings().obj(), null);
-    });
-    it('x', function () {
-      var obj = {a: 1, b: 1},
-          $$obj = jsoon(obj);
-
-      assert.equal($$obj.find(obj).siblings().obj(), null);
-    });
-    it('x', function () {
-      var obj = {a: 1, b: 1, c: [{d: 1}]},
-          $$obj = jsoon(obj);
-
-      assert.equal($$obj.find(obj).siblings().obj(), null);
-    });
-    it('x', function () {
-      var obj = [{a: 1}, {b: 1}],
-          $$obj = jsoon(obj);
-
-      assert.equal($$obj.find(obj[0]).siblings().obj(), [obj[1]]);
-    });
-    it('x', function () {
-      var obj = [{a: 1}, {b: 1}, {c: 1}, {d: 1}],
-          $$obj = jsoon(obj);
-
-      assert.equal($$obj.find(obj[0]).siblings().obj(), [obj[1], obj[2], obj[3]]);
-    });
-    it('x', function () {
-      var obj = [{a: 1}, {b: [{c: 1}, {d: 1}]}],
-          $$obj = jsoon(obj);
-
-      assert.equal($$obj.find(obj[0]).siblings().obj(), [obj[1]]);
-    });
-  });
-});
+// describe('`siblings` method', function () {
+//   describe('returns siblings of each object in current', function () {
+//     it('x', function () {
+//       var obj = {a: 1},
+//           $$obj = jsoon(obj);
+//
+//       assert.equal($$obj.find(obj).siblings().obj(), null);
+//     });
+//     it('x', function () {
+//       var obj = {a: 1, b: 1},
+//           $$obj = jsoon(obj);
+//
+//       assert.equal($$obj.find(obj).siblings().obj(), null);
+//     });
+//     it('x', function () {
+//       var obj = {a: 1, b: 1, c: [{d: 1}]},
+//           $$obj = jsoon(obj);
+//
+//       assert.equal($$obj.find(obj).siblings().obj(), null);
+//     });
+//     it('x', function () {
+//       var obj = [{a: 1}, {b: 1}],
+//           $$obj = jsoon(obj);
+//
+//       assert.equal($$obj.find(obj[0]).siblings().obj(), [obj[1]]);
+//     });
+//     it('x', function () {
+//       var obj = [{a: 1}, {b: 1}, {c: 1}, {d: 1}],
+//           $$obj = jsoon(obj);
+//
+//       assert.equal($$obj.find(obj[0]).siblings().obj(), [obj[1], obj[2], obj[3]]);
+//     });
+//     it('x', function () {
+//       var obj = [{a: 1}, {b: [{c: 1}, {d: 1}]}],
+//           $$obj = jsoon(obj);
+//
+//       assert.equal($$obj.find(obj[0]).siblings().obj(), [obj[1]]);
+//     });
+//   });
+// });

@@ -3,7 +3,9 @@
 'use strict';
 
 var DEV = true;
+
 var str = JSON.stringify;
+var parse = JSON.parse;
 
 module.exports = jsoon;
 
@@ -39,18 +41,17 @@ jsoon.fn = jsoon.prototype = {
   },
 
   find: function find(key) {
-
     var path = [];
     _traverse(this._root, /* tmp */function (k, v) {
       var acc = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
 
-      acc = JSON.parse(str(acc));
+      acc = parse(str(acc));
       if (typeof v === 'object') {
         acc.push(k);
       }
       if (k === key) {
         acc.push(k);
-        path.push(JSON.parse(str(acc)));
+        path.push(parse(str(acc)));
         acc = [];
       }
       return acc;
@@ -81,11 +82,8 @@ jsoon.fn = jsoon.prototype = {
     if (this._current == null) return this._root;
     // console.log(idt(2), '#val', str(this._current));
     return _resolveAll.apply(this, [this._current]);
-  },
-
-  _dump: function _dump() {
-    return this;
   }
+
 };
 
 function _traverse(obj, fn, acc) {
@@ -110,7 +108,7 @@ function _resolve(path, obj) {
 }
 
 function _resolveAll(paths) {
-  console.log(idt(1 + 2), '#_resolveAll', str(paths));
+  // console.log(idt(1 + 2), '#_resolveAll', str(paths));
   var ret = [];
   for (var i = 0, len = paths.length; i < len; i++) {
     ret.push(_resolve(paths[i], this._root));
@@ -118,16 +116,7 @@ function _resolveAll(paths) {
   return ret;
 }
 
-function idt(lvl) {
-  return new Array(lvl).join('  ');
-}
-
-var toString = function toString() {
-  return Object.prototype.toString.apply(arguments[0]);
-};
-
 if (DEV) {
-
   jsoon._resolve = _resolve;
   jsoon._resolveAll = _resolveAll;
 }
