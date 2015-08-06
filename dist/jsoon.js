@@ -22,6 +22,14 @@ function jsoon(json) {
 }
 
 jsoon.fn = jsoon.prototype = {
+  val: function val() {
+    if (this._current == null) return this._root;
+    // console.log(idt(2), '#val', str(this._current));
+    return _resolveAll.apply(this, [this._current]);
+  }
+};
+
+var chainableFns = {
 
   root: function root() {
     this._current = null;
@@ -91,15 +99,30 @@ jsoon.fn = jsoon.prototype = {
 
   keys: function keys() {
     return null;
-  },
-
-  val: function val() {
-    if (this._current == null) return this._root;
-    // console.log(idt(2), '#val', str(this._current));
-    return _resolveAll.apply(this, [this._current]);
   }
 
 };
+
+// Merge chainable prototype functions.
+
+var _loop2 = function (key) {
+  if (chainableFns.hasOwnProperty(key)) {
+    jsoon.fn[key] = function () {
+
+      // Chainable methoss must not have side effect to myself
+      // so create a new clone and return one.
+      var cloned = jsoon();
+      cloned._root = this._root;
+      cloned._current = this._current;
+
+      return chainableFns[key].apply(cloned, arguments);
+    };
+  }
+};
+
+for (var key in chainableFns) {
+  _loop2(key);
+}
 
 function _traverse(obj, fn, acc) {
   for (var k in obj) {

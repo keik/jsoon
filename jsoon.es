@@ -4,8 +4,8 @@
 
 const DEV = true;
 
-var str = JSON.stringify;
-var parse = JSON.parse;
+let str = JSON.stringify;
+let parse = JSON.parse;
 
 module.exports = jsoon;
 
@@ -22,6 +22,15 @@ function jsoon (json) {
 }
 
 jsoon.fn = jsoon.prototype = {
+  val: function () {
+    if (this._current == null)
+      return this._root;
+    // console.log(idt(2), '#val', str(this._current));
+    return _resolveAll.apply(this, [this._current]);
+  }
+};
+
+let chainableFns = {
 
   root: function () {
     this._current = null;
@@ -83,16 +92,25 @@ jsoon.fn = jsoon.prototype = {
 
   keys: function () {
     return null;
-  },
-
-  val: function () {
-    if (this._current == null)
-      return this._root;
-    // console.log(idt(2), '#val', str(this._current));
-    return _resolveAll.apply(this, [this._current]);
   }
 
 };
+
+// Merge chainable prototype functions.
+for (let key in chainableFns) {
+  if (chainableFns.hasOwnProperty(key)) {
+    jsoon.fn[key] = function () {
+
+      // Chainable methods must not have side effect to myself
+      // so create a new clone and return one.
+      let cloned = jsoon();
+      cloned._root = this._root;
+      cloned._current = this._current;
+
+      return chainableFns[key].apply(cloned, arguments);
+    };
+  }
+}
 
 function _traverse (obj, fn, acc) {
   for (let k in obj) {
@@ -147,7 +165,6 @@ function _uniqPaths (paths) {
   }
   return ret;
 }
-
 
 if (DEV) {
   jsoon._resolve = _resolve;

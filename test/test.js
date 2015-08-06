@@ -57,26 +57,34 @@ describe('module', function () {
 });
 
 describe('methods', function () {
-  var $$obj = jsoon({});
+  describe('exported', function () {
+    var methods = [
+      'root',
+      'parent',
+      'children',
+      'siblings',
+      'find',
+      'eq',
+      'keys',
+      'val'
+    ];
+    for (var i = 0, len = methods.length; i < len; i++) {
+      it('`' + methods[i] + '` are exported', (function (method) {
+        return function () {
+          var $$obj = jsoon({});
 
-  var methods = [
-    'root',
-    'parent',
-    'children',
-    'siblings',
-    'find',
-    'eq',
-    'keys',
-    'val'
-  ];
+          assert.typeOf($$obj[method], 'function');
+        };
+      }(methods[i])));
+    }
+  });
+  it('chainable methods have no side-effect to myself', function () {
+    var $$obj = jsoon(obj),
+        beforeVal = $$obj.val();
 
-  for (var i = 0, len = methods.length; i < len; i++) {
-    it('`' + methods[i] + '` are exported', (function (method) {
-      return function () {
-        assert.typeOf($$obj[method], 'function');
-      };
-    }(methods[i])));
-  }
+    $$obj.find('name');
+    assert.equal(beforeVal, $$obj.val());
+  });
 });
 
 describe('`val` method', function () {
