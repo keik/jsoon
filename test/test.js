@@ -100,16 +100,24 @@ describe('`find` method', function () {
     it('returns descendants of each object in current filtered by `key`', function () {
       var $$obj = jsoon(obj);
 
-      assert.sameDeepMembers($$obj.find('name').val(),
-                             ['Alice', 'Bob', 'Carol', 'Dave', 'Elen', 'Fred', 'Greg']);
+      assert.equal(str($$obj.find('name').val()),
+                   str(['Alice', 'Bob', 'Carol', 'Dave', 'Elen', 'Fred', 'Greg']));
     });
   });
   describe('with multiple parameters', function () {
     it('returns descendants of each object in current filtered by multiple `key`s which separated by `,`', function () {
       var $$obj = jsoon(obj);
 
-      assert.sameDeepMembers($$obj.find('name, date-of-birth').val(),
-                             ['Alice', 'Bob', 'Carol', 'Dave', 'Elen', 'Fred', 'Greg', '2000-01-01']);
+      assert.equal(str($$obj.find('name, date-of-birth').val()),
+                   str(['Alice', 'Bob', 'Carol', 'Dave', 'Elen', 'Fred', 'Greg', '2000-01-01']));
+    });
+  });
+  describe('with redundant parameters', function () {
+    it('returns descendants of each object with duplicated-freed form', function () {
+      var $$obj = jsoon(obj);
+
+      assert.lengthOf($$obj.find('name, name, name').val(),
+                      ['Alice', 'Bob', 'Carol', 'Dave', 'Elen', 'Fred', 'Greg'].length);
     });
   });
 });
@@ -119,14 +127,14 @@ describe('`eq` method', function () {
     it('eq(0)', function () {
       var $$obj = jsoon(obj);
 
-      assert.sameMembers($$obj.find('name').eq(0).val(),
-                         ['Alice']);
+      assert.equal(str($$obj.find('name').eq(0).val()),
+                   str(['Alice']));
     });
     it('eq(6)', function () {
       var $$obj = jsoon(obj);
 
-      assert.sameMembers($$obj.find('name').eq(6).val(),
-                         ['Greg']);
+      assert.equal(str($$obj.find('name').eq(6).val()),
+                   str(['Greg']));
     });
   });
 });
@@ -136,14 +144,14 @@ describe('`first` and `last` method', function () {
     it('first()', function () {
       var $$obj = jsoon(obj);
 
-      assert.sameMembers($$obj.find('name').first().val(),
-                         ['Alice']);
+      assert.equal(str($$obj.find('name').first().val()),
+                   str(['Alice']));
     });
     it('last', function () {
       var $$obj = jsoon(obj);
 
-      assert.sameMembers($$obj.find('name').last().val(),
-                         ['Greg']);
+      assert.equal(str($$obj.find('name').last().val()),
+                   str(['Greg']));
     });
   });
 });
@@ -184,7 +192,8 @@ describe('inner method', function () {
           ret = jsoon._resolveAll.apply($$obj, [[
             [0, 'name']
           ]]);
-      assert.sameMembers(ret, ['Alice']);
+
+      assert.equal(str(ret), str(['Alice']));
     });
     it('2', function () {
       var $$obj = jsoon(obj),
@@ -192,7 +201,15 @@ describe('inner method', function () {
             [0, 'name'],
             [1, 'name']
           ]]);
-      assert.sameMembers(ret, ['Alice', 'Dave']);
+
+      assert.equal(str(ret), str(['Alice', 'Dave']));
+    });
+  });
+  describe('`_uniqPaths`', function () {
+    it('returns duplicate-free array', function () {
+      var ary = [[0], [1], [2, 2], [3, [3, 3]], [1], [2, 2], [3, [3, 3]]];
+
+      assert.equal(str(jsoon._uniqPaths(ary)), str([[0], [1], [2, 2], [3, [3, 3]]]));
     });
   });
 });
