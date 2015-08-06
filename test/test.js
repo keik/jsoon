@@ -109,7 +109,7 @@ describe('`find` method', function () {
       var $$obj = jsoon(obj);
 
       assert.sameDeepMembers($$obj.find('name, date-of-birth').val(),
-                             ['Alice', 'Bob', 'Carol', 'Dave', 'Elen', 'Fred', 'Greg']);
+                             ['Alice', 'Bob', 'Carol', 'Dave', 'Elen', 'Fred', 'Greg', '2000-01-01']);
     });
   });
 });
