@@ -5,13 +5,13 @@
 const DEV = true;
 const str = JSON.stringify;
 
-module.exports = jsonq;
+module.exports = jsoon;
 
-function jsonq (json) {
+function jsoon (json) {
   if (this == null) {
 
     /* eslint new-cap: [0] */
-    return new jsonq(json);
+    return new jsoon(json);
   }
 
   this._root = json;
@@ -19,7 +19,7 @@ function jsonq (json) {
   return this;
 }
 
-jsonq.fn = jsonq.prototype = {
+jsoon.fn = jsoon.prototype = {
 
   root: function () {
     this._current = null;
@@ -119,8 +119,6 @@ var toString = function () {
 };
 
 if (DEV) {
-
-
-  jsonq._resolve = _resolve;
-  jsonq._resolveAll = _resolveAll;
+  jsoon._resolve = _resolve;
+  jsoon._resolveAll = _resolveAll;
 }

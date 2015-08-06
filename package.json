@@ -1,5 +1,5 @@
 {
-  "name": "jsonq",
+  "name": "jsoon",
   "version": "0.0.0",
   "description": "JSON query engine",
   "scripts": {
@@ -12,12 +12,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/keik/jsonq.git"
+    "url": "https://github.com/keik/jsoon.git"
   },
   "bugs": {
-    "url": "https://github.com/keik/jsonq/issues"
+    "url": "https://github.com/keik/jsoon/issues"
   },
-  "homepage": "https://github.com/keik/jsonq#readme",
+  "homepage": "https://github.com/keik/jsoon#readme",
   "author": {
     "name": "keik",
     "email": "k4t0.kei@gmail.com",
