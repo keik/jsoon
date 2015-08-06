@@ -2,6 +2,9 @@
 
 'use strict';
 
+const DEV = true;
+const str = JSON.stringify;
+
 module.exports = jsonq;
 
 function jsonq (json) {
@@ -12,17 +15,14 @@ function jsonq (json) {
   }
 
   this._root = json;
-  this._current = json;
+  this._current = null;
   return this;
-}
-
-function traverse () {
 }
 
 jsonq.fn = jsonq.prototype = {
 
   root: function () {
-    this._current = this._root;
+    this._current = null;
     return this;
   },
 
@@ -38,16 +38,29 @@ jsonq.fn = jsonq.prototype = {
     return null;
   },
 
-  find: function () {
-    return null;
+  find: function (key) {
+
+
+    let path = [];
+    _traverse(this._root/* tmp */, function (k, v, acc = []) {
+      acc = JSON.parse(str(acc));
+      if (typeof v === 'object') {
+        acc.push(k);
+      }
+      if (k === key) {
+        acc.push(k);
+        path.push(JSON.parse(str(acc)));
+        acc = [];
+      }
+      return acc;
+    });
+
+    this._current = path;
+    return this;
   },
 
   eq: function () {
     return null;
-  },
-
-  obj: function () {
-    return this._current;
   },
 
   keys: function () {
@@ -55,10 +68,59 @@ jsonq.fn = jsonq.prototype = {
   },
 
   val: function () {
-    return null;
+    if (this._current == null)
+      return this._root;
+    // console.log(idt(2), '#val', str(this._current));
+    return _resolveAll.apply(this, [this._current]);
   },
 
   _dump: function () {
     return this;
   }
 };
+
+function _traverse (obj, fn, acc) {
+  for (let k in obj) {
+    if (obj.hasOwnProperty(k)) {
+      let v = obj[k];
+      var ret = fn(k, v, acc);
+      if (typeof v === 'object') {
+        _traverse(v, fn, ret);
+      }
+    }
+  }
+}
+
+function _resolve (path, obj) {
+  // console.log(idt(1 + 2), '#_resolve', path, str(obj));
+  let p =  path.shift();
+  if (p == null) {
+    return obj;
+  }
+  return _resolve.bind(this)(path, obj[p]);
+}
+
+function _resolveAll (paths) {
+  console.log(idt(1 + 2), '#_resolveAll', str(paths));
+  let ret = [];
+  for (let i = 0, len = paths.length; i < len; i++) {
+    ret.push(_resolve(paths[i], this._root));
+  }
+  return ret;
+}
+
+
+function idt (lvl) {
+  return new Array(lvl).join('  ');
+}
+
+var toString = function () {
+  return Object.prototype.toString.apply(arguments[0]);
+};
+
+if (DEV) {
+
+
+  jsonq._resolve = _resolve;
+  jsonq._resolveAll = _resolveAll;
+}

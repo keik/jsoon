@@ -5,6 +5,50 @@ var assert = require('chai').assert;
 
 var jsonq = require('./../dist/jsonq');
 
+var str = JSON.stringify;
+var parse = JSON.parse;
+
+var obj = [
+  {
+    name: 'Alice',
+    age: 40,
+    gender: 'female',
+    children: [
+      {
+        name: 'Bob',
+        age: 15,
+        gender: 'male'
+      }, {
+        name: 'Carol',
+        age: 14,
+        gender: 'female'
+      }
+    ]
+  }, {
+    name: 'Dave',
+    age: 65,
+    gender: 'male',
+    children: [
+      {
+        name: 'Elen',
+        age: 40,
+        gender: 'female',
+        children: [
+          {
+            name: 'Fred',
+            age: 12,
+            gender: 'male'
+          }
+        ]
+      }, {
+        name: 'Greg',
+        age: 35,
+        gender: 'male'
+      }
+    ]
+  }
+];
+
 describe('module', function () {
   it('exists', function () {
     assert.ok(jsonq);
@@ -12,104 +56,97 @@ describe('module', function () {
 });
 
 describe('methods', function () {
-  it('are exported', function () {
-    var $$item = jsonq({a: 1});
+  var $$obj = jsonq({});
 
-    assert.typeOf($$item.root,     'function');
-    assert.typeOf($$item.parent,   'function');
-    assert.typeOf($$item.children, 'function');
-    assert.typeOf($$item.siblings, 'function');
-    assert.typeOf($$item.find,     'function');
-    assert.typeOf($$item.eq,       'function');
-    assert.typeOf($$item.obj,      'function');
-    assert.typeOf($$item.keys,     'function');
-    assert.typeOf($$item.val,      'function');
-  });
+  var methods = [
+    'root',
+    'parent',
+    'children',
+    'siblings',
+    'find',
+    'eq',
+    'keys',
+    'val'
+  ];
+
+  for (var i = 0, len = methods.length; i < len; i++) {
+    it('`' + methods[i] + '` are exported', (function (method) {
+      return function () {
+        assert.typeOf($$obj[method], 'function');
+      };
+    }(methods[i])));
+  }
 });
 
-describe('`obj` method', function () {
-  describe('returns current object', function () {
-    it('when item is blank array', function () {
-      var item = [],
-          $$item = jsonq(item);
+describe('`val` method', function () {
+  describe('returns current value', function () {
+    var $$obj = jsonq(obj);
 
-      assert.equal($$item.obj(), item);
-    });
-    it('when item is blank object', function () {
-      var item = {},
-          $$item = jsonq(item);
-
-      assert.equal($$item.obj(), item);
-    });
-    it('when item is object which have one property', function () {
-      var item = {a: 1},
-          $$item = jsonq(item);
-
-      assert.equal($$item.obj(), item);
-    });
-    it('when item is array which have two objects', function () {
-      var item = [{a: 1}, {b: 2}],
-          $$item = jsonq(item);
-
-      assert.equal($$item.obj(), item);
-    });
+    assert.equal($$obj.val(), obj);
   });
 });
 
 describe('`root` method', function () {
-  describe('returns root item', function () {
-    it('when item is blank array', function () {
-      var item = [],
-          $$item = jsonq(item);
+  it('returns root obj', function () {
+    var $$obj = jsonq(obj);
 
-      assert.equal($$item.root().obj(), item);
-    });
-    it('when item is blank object', function () {
-      var item = {},
-          $$item = jsonq(item);
-
-      assert.equal($$item.root().obj(), item);
-    });
-    it('when item is object which have one property', function () {
-      var item = {a: 1},
-          $$item = jsonq(item);
-
-      assert.equal($$item.root().obj(), item);
-    });
-    it('when item is array which have two objects', function () {
-      var item = [{a: 1}, {b: 2}],
-          $$item = jsonq(item);
-
-      assert.equal($$item.root().obj(), item);
-    });
+    assert.equal($$obj.root().val(), obj);
   });
 });
 
 describe('`find` method', function () {
-  describe('returns descendants of each object in current', function () {
-    it('filterd by `key` from a object', function () {
-      var item = {a: 1, b: 2},
-          $$item = jsonq(item);
+  describe('returns descendants of each object in current filtered by `key', function () {
+    it('when JSON object has no nested / two properties', function () {
+      var $$obj = jsonq(obj);
 
-      assert.equal($$item.find({key: 'x'}).obj(), []);
-      assert.equal($$item.find({key: 'a'}).obj(), []);
+      assert.sameDeepMembers(
+        $$obj.find('name')._current,
+        [['0', 'name'],
+         ['0', 'children', '0', 'name'],
+         ['0', 'children', '1', 'name'],
+         ['1', 'name'],
+         ['1', 'children', '0', 'name'],
+         ['1', 'children', '0', 'children', '0', 'name'],
+         ['1', 'children', '1', 'name']]
+      );
     });
-    it('filtered by `key` from same depth', function () {
-      var item = [{a: 1}, {b: 2}, {c: 3}],
-          $$item = jsonq(item);
+  });
+});
 
-      assert.equal($$item.find({key: 'x'}).obj(), []);
-      assert.equal($$item.find({key: 'a'}).obj(), []);
+describe('inner method', function () {
+  describe('`_resolve` returns specific objects', function () {
+    it('1', function () {
+      var ret = jsonq._resolve(['name'], obj[0]);
+      assert.equal(ret, 'Alice');
     });
-    it('filterd by `key` from nested', function () {
-      var item = {a: 1, b: {c: 1, d: {e: 1}}},
-          $$item = jsonq(item);
-
-      assert.equal($$item.find({key: 'x'}).obj(), []);
-      assert.equal($$item.find({key: 'a'}).obj(), []);
-      assert.equal($$item.find({key: 'b'}).obj(), []);
-      assert.equal($$item.find({key: 'c'}).obj(), []);
-      assert.equal($$item.find({key: 'd'}).obj(), [item.b.d]);
+    it('2', function () {
+      var ret = jsonq._resolve([0, 'children'], obj);
+      assert.equal(ret, obj[0].children);
+    });
+    it('3', function () {
+      var ret = jsonq._resolve([1, 'children', 0, 'name'], obj);
+      assert.equal(ret, 'Elen');
+    });
+    it('4', function () {
+      var ret = jsonq._resolve([1, 'children', 1, 'gender'], obj);
+      assert.equal(ret, 'male');
+    });
+  });
+  describe('`_resolveAll` returns specific objects', function () {
+    it('1', function () {
+      var $$obj = jsonq(obj),
+          ret = jsonq._resolveAll.apply($$obj, [[
+            [0, 'name']
+          ]]);
+      assert.sameMembers(ret, ['Alice']);
+    });
+    it('2', function () {
+      var $$obj = jsonq(obj),
+          ret = jsonq._resolveAll.apply($$obj, [[
+            [0, 'name'],
+            [1, 'name']
+          ]]);
+      assert.sameMembers(ret, ['Alice', 'Dave']);
     });
   });
 });
@@ -117,40 +154,40 @@ describe('`find` method', function () {
 describe('`siblings` method', function () {
   describe('returns siblings of each object in current', function () {
     it('x', function () {
-      var item = {a: 1},
-          $$item = jsonq(item);
+      var obj = {a: 1},
+          $$obj = jsonq(obj);
 
-      assert.equal($$item.find(item).siblings().obj(), null);
+      assert.equal($$obj.find(obj).siblings().obj(), null);
     });
     it('x', function () {
-      var item = {a: 1, b: 1},
-          $$item = jsonq(item);
+      var obj = {a: 1, b: 1},
+          $$obj = jsonq(obj);
 
-      assert.equal($$item.find(item).siblings().obj(), null);
+      assert.equal($$obj.find(obj).siblings().obj(), null);
     });
     it('x', function () {
-      var item = {a: 1, b: 1, c: [{d: 1}]},
-          $$item = jsonq(item);
+      var obj = {a: 1, b: 1, c: [{d: 1}]},
+          $$obj = jsonq(obj);
 
-      assert.equal($$item.find(item).siblings().obj(), null);
+      assert.equal($$obj.find(obj).siblings().obj(), null);
     });
     it('x', function () {
-      var item = [{a: 1}, {b: 1}],
-          $$item = jsonq(item);
+      var obj = [{a: 1}, {b: 1}],
+          $$obj = jsonq(obj);
 
-      assert.equal($$item.find(item[0]).siblings().obj(), [item[1]]);
+      assert.equal($$obj.find(obj[0]).siblings().obj(), [obj[1]]);
     });
     it('x', function () {
-      var item = [{a: 1}, {b: 1}, {c: 1}, {d: 1}],
-          $$item = jsonq(item);
+      var obj = [{a: 1}, {b: 1}, {c: 1}, {d: 1}],
+          $$obj = jsonq(obj);
 
-      assert.equal($$item.find(item[0]).siblings().obj(), [item[1], item[2], item[3]]);
+      assert.equal($$obj.find(obj[0]).siblings().obj(), [obj[1], obj[2], obj[3]]);
     });
     it('x', function () {
-      var item = [{a: 1}, {b: [{c: 1}, {d: 1}]}],
-          $$item = jsonq(item);
+      var obj = [{a: 1}, {b: [{c: 1}, {d: 1}]}],
+          $$obj = jsonq(obj);
 
-      assert.equal($$item.find(item[0]).siblings().obj(), [item[1]]);
+      assert.equal($$obj.find(obj[0]).siblings().obj(), [obj[1]]);
     });
   });
 });
