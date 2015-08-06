@@ -59,8 +59,17 @@ jsoon.fn = jsoon.prototype = {
     return this;
   },
 
-  eq: function () {
-    return null;
+  eq: function (i) {
+    this._current = [this._current[i]];
+    return this;
+  },
+
+  first: function () {
+    return this.eq(0);
+  },
+
+  last: function () {
+    return this.eq(this._current.length - 1);
   },
 
   keys: function () {

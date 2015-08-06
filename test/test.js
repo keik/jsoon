@@ -99,16 +99,43 @@ describe('`find` method', function () {
     it('when JSON object has no nested / two properties', function () {
       var $$obj = jsoon(obj);
 
-      assert.sameDeepMembers(
-        $$obj.find('name')._current,
-        [['0', 'name'],
-         ['0', 'children', '0', 'name'],
-         ['0', 'children', '1', 'name'],
-         ['1', 'name'],
-         ['1', 'children', '0', 'name'],
-         ['1', 'children', '0', 'children', '0', 'name'],
-         ['1', 'children', '1', 'name']]
+      assert.sameDeepMembers($$obj.find('name').val(),
+                             ['Alice', 'Bob', 'Carol', 'Dave', 'Elen', 'Fred', 'Greg']
       );
+    });
+  });
+});
+
+describe('`eq` method', function () {
+  describe('returns object at the specified index', function () {
+    it('eq(0)', function () {
+      var $$obj = jsoon(obj);
+
+      assert.sameMembers($$obj.find('name').eq(0).val(),
+                         ['Alice']);
+    });
+    it('eq(6)', function () {
+      var $$obj = jsoon(obj);
+
+      assert.sameMembers($$obj.find('name').eq(6).val(),
+                         ['Greg']);
+    });
+  });
+});
+
+describe('`first` and `last` method', function () {
+  describe('returns object at the specified index', function () {
+    it('first()', function () {
+      var $$obj = jsoon(obj);
+
+      assert.sameMembers($$obj.find('name').first().val(),
+                         ['Alice']);
+    });
+    it('last', function () {
+      var $$obj = jsoon(obj);
+
+      assert.sameMembers($$obj.find('name').last().val(),
+                         ['Greg']);
     });
   });
 });
