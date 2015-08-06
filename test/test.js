@@ -112,6 +112,14 @@ describe('`find` method', function () {
                              ['Alice', 'Bob', 'Carol', 'Dave', 'Elen', 'Fred', 'Greg', '2000-01-01']);
     });
   });
+  describe('with redundant parameters', function () {
+    it('returns descendants of each object with duplicated-freed form', function () {
+      var $$obj = jsoon(obj);
+
+      assert.lengthOf($$obj.find('name, name, name').val(),
+                      ['Alice', 'Bob', 'Carol', 'Dave', 'Elen', 'Fred', 'Greg'].length);
+    });
+  });
 });
 
 describe('`eq` method', function () {
@@ -193,6 +201,13 @@ describe('inner method', function () {
             [1, 'name']
           ]]);
       assert.sameMembers(ret, ['Alice', 'Dave']);
+    });
+  });
+  describe('`_uniq`', function () {
+    it('returns duplicate-free array', function () {
+      var ary = [1, 2, 3, 4, 'a', 'b', 'c', 3, 'b'];
+
+      assert.sameMembers(jsoon._uniq(ary), [1, 2, 3, 4, 'a', 'b', 'c']);
     });
   });
 });

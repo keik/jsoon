@@ -64,8 +64,8 @@ jsoon.fn = jsoon.prototype = {
         return acc;
       });
     }
-
-    this._current = paths;
+    console.log(paths, _uniq(paths));
+    this._current = _uniq(paths);
     return this;
   },
 
@@ -125,7 +125,27 @@ function _resolveAll (paths) {
   return ret;
 }
 
+/**
+ * Return duplicate-free array.
+ * (different objects which has same properties are dealt with NOT same object)
+ * @private
+ * @param {Array} array source array
+ * @returns {Array} duplicate-freed array
+ */
+function _uniq (array) {
+  let ret = [];
+  for (let i = 0, len = array.length; i < len; i++) {
+    let t = array[i];
+    if (ret.indexOf(t) === -1) {
+      ret.push(t);
+    }
+  }
+  return ret;
+}
+
+
 if (DEV) {
   jsoon._resolve = _resolve;
   jsoon._resolveAll = _resolveAll;
+  jsoon._uniq = _uniq;
 }
