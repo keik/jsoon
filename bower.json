@@ -1,0 +1,25 @@
+{
+  "name": "jsoon",
+  "main": "jsoon.js",
+  "version": "0.0.0",
+  "homepage": "https://github.com/keik/jsoon",
+  "authors": [
+    "keik <k4t0.kei@gmail.com>"
+  ],
+  "description": "JSON query engine",
+  "keywords": [
+    "json",
+    "traverse",
+    "manipulate",
+    "query"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "lib",
+    "index.js"
+  ]
+}

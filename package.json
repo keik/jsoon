@@ -3,12 +3,16 @@
   "version": "0.0.0",
   "description": "JSON query engine",
   "scripts": {
-    "lint": "eslint ./*.es || true",
-    "test": "npm run babel && npm run mocha",
-    "start": "babel ./*.es -d ./dist -w",
-
-    "mocha": "mocha test/*.js || true",
-    "babel": "babel ./*.es -d ./dist"
+    "lint": "npm run eslint",
+    "test": "npm run mocha",
+    "watch": "babel ./lib -d ./lib -w --blacklist strict",
+    "build": "npm run eslint && npm run babel && npm run browserify && npm run uglify && npm run test",
+    "-----": "----------------------------------------------------------------",
+    "eslint": "eslint ./lib/*.es",
+    "mocha": "mocha test/tests.js",
+    "babel": "babel ./lib -d ./lib --blacklist strict",
+    "browserify": "browserify -e lib/jsoon.js -o jsoon.js -s jsoon",
+    "uglify": "uglifyjs jsoon.js -o jsoon.min.js --comments"
   },
   "repository": {
     "type": "git",
@@ -26,9 +30,11 @@
   "license": "MIT",
   "devDependencies": {
     "babel": "^5.8.20",
+    "browserify": "^11.0.1",
     "chai": "^3.2.0",
     "eslint": "^1.0.0",
     "mocha": "^2.2.5",
+    "uglifyjs": "^2.4.10",
     "watch": "^0.16.0"
   }
 }

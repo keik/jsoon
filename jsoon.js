@@ -1,16 +1,20 @@
-/* eslint strict: [0] */
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.jsoon = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/**
+ * https://github.com/keik/jsoon
+ * @license MIT
+ */
 
-'use strict';
+/* eslint strict: [0], no-loop-func: [0] */
 
 var DEV = true;
 
 var str = JSON.stringify;
 var parse = JSON.parse;
 
-module.exports = jsoon;
+exports = module.exports = jsoon;
 
 function jsoon(json) {
-  if (this == null) {
+  if (!(this instanceof jsoon)) {
 
     /* eslint new-cap: [0] */
     return new jsoon(json);
@@ -21,13 +25,22 @@ function jsoon(json) {
   return this;
 }
 
-jsoon.fn = jsoon.prototype = {
+jsoon.fn = jsoon.prototype;
+
+var unchainableFns = {
   val: function val() {
     if (this._current == null) return this._root;
     // console.log(idt(2), '#val', str(this._current));
     return _resolveAll.apply(this, [this._current]);
   }
 };
+
+// Merge chainable prototype functions.
+for (var key in unchainableFns) {
+  if (unchainableFns.hasOwnProperty(key)) {
+    jsoon.fn[key] = unchainableFns[key];
+  }
+}
 
 var chainableFns = {
 
@@ -58,7 +71,7 @@ var chainableFns = {
     var keys = key.split(/,/),
         paths = [];
 
-    var _loop = function (i, len) {
+    var _loop = function _loop(i, len) {
       var key = keys[i].trim();
 
       _traverse(_this._root, /* tmp */function (k, v) {
@@ -105,11 +118,11 @@ var chainableFns = {
 
 // Merge chainable prototype functions.
 
-var _loop2 = function (key) {
+var _loop2 = function _loop2(key) {
   if (chainableFns.hasOwnProperty(key)) {
     jsoon.fn[key] = function () {
 
-      // Chainable methoss must not have side effect to myself
+      // Chainable methods must not have side effect to myself
       // so create a new clone and return one.
       var cloned = jsoon();
       cloned._root = this._root;
@@ -182,3 +195,5 @@ if (DEV) {
   jsoon._resolveAll = _resolveAll;
   jsoon._uniqPaths = _uniqPaths;
 }
+},{}]},{},[1])(1)
+});

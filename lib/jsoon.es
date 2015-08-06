@@ -1,16 +1,19 @@
-/* eslint strict: [0] */
+/**
+ * https://github.com/keik/jsoon
+ * @license MIT
+ */
 
-'use strict';
+/* eslint strict: [0], no-loop-func: [0] */
 
 const DEV = true;
 
 let str = JSON.stringify;
 let parse = JSON.parse;
 
-module.exports = jsoon;
+exports = module.exports = jsoon;
 
 function jsoon (json) {
-  if (this == null) {
+  if (!(this instanceof jsoon)) {
 
     /* eslint new-cap: [0] */
     return new jsoon(json);
@@ -21,14 +24,25 @@ function jsoon (json) {
   return this;
 }
 
-jsoon.fn = jsoon.prototype = {
+jsoon.fn = jsoon.prototype;
+
+let unchainableFns = {
+
   val: function () {
     if (this._current == null)
       return this._root;
     // console.log(idt(2), '#val', str(this._current));
     return _resolveAll.apply(this, [this._current]);
   }
+
 };
+
+// Merge unchainable prototype functions.
+for (let key in unchainableFns) {
+  if (unchainableFns.hasOwnProperty(key)) {
+    jsoon.fn[key] = unchainableFns[key];
+  }
+}
 
 let chainableFns = {
 

@@ -1,9 +1,10 @@
 /* global describe, it */
 /* eslint strict: [0] */
 
-var assert = require('chai').assert;
+var chai = chai || require('chai'),
+    assert = chai.assert;
 
-var jsoon = require('./../dist/jsoon');
+var jsoon = jsoon || require('./../');
 
 var str = JSON.stringify;
 var parse = JSON.parse;
