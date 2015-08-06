@@ -45,23 +45,35 @@ jsoon.fn = jsoon.prototype = {
   },
 
   find: function find(key) {
-    var path = [];
-    _traverse(this._root, /* tmp */function (k, v) {
-      var acc = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
+    var _this = this;
 
-      acc = parse(str(acc));
-      if (typeof v === 'object') {
-        acc.push(k);
-      }
-      if (k === key) {
-        acc.push(k);
-        path.push(parse(str(acc)));
-        acc = [];
-      }
-      return acc;
-    });
+    var keys = key.split(/,/),
+        paths = [];
 
-    this._current = path;
+    var _loop = function (i, len) {
+      var key = keys[i].trim();
+
+      _traverse(_this._root, /* tmp */function (k, v) {
+        var acc = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
+
+        acc = parse(str(acc));
+        if (typeof v === 'object') {
+          acc.push(k);
+        }
+        if (k === key) {
+          acc.push(k);
+          paths.push(parse(str(acc)));
+          acc = [];
+        }
+        return acc;
+      });
+    };
+
+    for (var i = 0, len = keys.length; i < len; i++) {
+      _loop(i, len);
+    }
+
+    this._current = paths;
     return this;
   },
 

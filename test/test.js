@@ -21,7 +21,8 @@ var obj = [
       }, {
         name: 'Carol',
         age: 14,
-        gender: 'female'
+        gender: 'female',
+        'date-of-birth': '2000-01-01'
       }
     ]
   }, {
@@ -95,11 +96,19 @@ describe('`root` method', function () {
 });
 
 describe('`find` method', function () {
-  describe('returns descendants of each object in current filtered by `key', function () {
-    it('when JSON object has no nested / two properties', function () {
+  describe('with single parameter', function () {
+    it('returns descendants of each object in current filtered by `key`', function () {
       var $$obj = jsoon(obj);
 
       assert.sameDeepMembers($$obj.find('name').val(),
+                             ['Alice', 'Bob', 'Carol', 'Dave', 'Elen', 'Fred', 'Greg']);
+    });
+  });
+  describe('with multiple parameters', function () {
+    it('returns descendants of each object in current filtered by multiple `key`s which separated by `,`', function () {
+      var $$obj = jsoon(obj);
+
+      assert.sameDeepMembers($$obj.find('name, date-of-birth').val(),
                              ['Alice', 'Bob', 'Carol', 'Dave', 'Elen', 'Fred', 'Greg']);
     });
   });
