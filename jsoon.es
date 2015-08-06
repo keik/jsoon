@@ -29,7 +29,11 @@ jsoon.fn = jsoon.prototype = {
   },
 
   parent: function () {
-    return null;
+    let current = this._current;
+    for (let i = 0, len = current.length; i < len; i++) {
+      current[i].pop();
+    }
+    return this;
   },
 
   children: function () {

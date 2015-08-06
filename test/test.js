@@ -139,6 +139,17 @@ describe('`first` and `last` method', function () {
   });
 });
 
+describe('`parent` method', function () {
+  it('returns object at the each of current object', function () {
+    it('', function () {
+      var $$obj = jsoon(obj);
+
+      assert.equal($$obj.find('name').eq(0).parent().val(),
+                   obj[0]);
+    });
+  });
+});
+
 describe('inner method', function () {
   describe('`_resolve` returns specific objects', function () {
     it('1', function () {
