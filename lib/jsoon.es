@@ -12,6 +12,11 @@ let parse = JSON.parse;
 
 exports = module.exports = jsoon;
 
+/**
+ * Return `jsoon` object which has several methods to query / manipulate / traverse.
+ * @param {object|string} json target object to play with
+ * @return {jsoon} `jsoon` object which has several methods
+ */
 function jsoon (json) {
   if (!(this instanceof jsoon)) {
 
@@ -26,12 +31,19 @@ function jsoon (json) {
 
 jsoon.fn = jsoon.prototype;
 
+/**
+ * Unchainable functions, which is not able to chain methods.
+ */
 let unchainableFns = {
 
+  /**
+   * Return value matched by the jsoon object.
+   * @return {*} value
+   */
   val: function () {
     if (this._current == null)
       return this._root;
-    // console.log(idt(2), '#val', str(this._current));
+    // console.log('  ', '#val', str(this._current));
     return _resolveAll.apply(this, [this._current]);
   }
 
@@ -44,29 +56,56 @@ for (let key in unchainableFns) {
   }
 }
 
+/**
+ * Chainable functions, which is able to chain methods by returning myself.
+ */
 let chainableFns = {
 
+  /**
+   * Get the root object.
+   * @return {jsoon} myself
+   */
   root: function () {
     this._current = null;
     return this;
   },
 
+  /**
+   * Get the parents of current item.
+   * @return {jsoon} myself
+   */
   parent: function () {
     let current = this._current;
     for (let i = 0, len = current.length; i < len; i++) {
       current[i].pop();
     }
+
+    this._current = _uniqPaths(this._current);
     return this;
   },
 
+  /**
+   * Get the parents of current item.
+   * @return {jsoon} myself
+   */
   children: function () {
+    // TODO
     return null;
   },
 
+  /**
+   * @return {jsoon} myself
+   */
   siblings: function () {
+    // TODO
     return null;
   },
 
+  /**
+   * Get the value of matched property at specified `key` recursively.
+   * @param {String} key property name
+   * @return {jsoon} myself
+   */
   find: function (key) {
     let keys = key.split(/,/),
         paths = [];
@@ -91,20 +130,37 @@ let chainableFns = {
     return this;
   },
 
+  /**
+   * Filter children expect for specified index.
+   * @param {number} i index
+   * @return {jsoon} myself
+   */
   eq: function (i) {
     this._current = [this._current[i]];
     return this;
   },
 
+  /**
+   * Alias of `.eq(0)`.
+   * @return {jsoon} myself
+   */
   first: function () {
     return this.eq(0);
   },
 
+  /**
+   * Alias of `.eq(<last-child>)`.
+   * @return {jsoon} myself
+   */
   last: function () {
     return this.eq(this._current.length - 1);
   },
 
+  /**
+   * @return {jsoon} myself
+   */
   keys: function () {
+    // TODO
     return null;
   }
 
@@ -126,7 +182,15 @@ for (let key in chainableFns) {
   }
 }
 
+/**
+ * @private
+ * @param {object} obj start point object to traverse
+ * @param {function} fn callback
+ * @param {*} acc accumulator
+ * @return {undefined} no retruns
+ */
 function _traverse (obj, fn, acc) {
+  console.log('  ', '#traverse', str(obj), str(acc));
   for (let k in obj) {
     if (obj.hasOwnProperty(k)) {
       let v = obj[k];
@@ -138,17 +202,30 @@ function _traverse (obj, fn, acc) {
   }
 }
 
+/**
+ * Return value in `obj`, which resolved through `path`.
+ * @private
+ * @param {string} path path to access to value
+ * @param {object} obj start point object to be accessed
+ * @return {object} resolved value
+ */
 function _resolve (path, obj) {
-  // console.log(idt(1 + 2), '#_resolve', path, str(obj));
-  let p =  path.shift();
+  // console.log('    ', '#_resolve', path, str(obj));
+  let p = path.shift();
   if (p == null) {
     return obj;
   }
   return _resolve.bind(this)(path, obj[p]);
 }
 
+/**
+ * Shim for `paths.map(_resolve)`.
+ * @private
+ * @param {array.<string>} paths collection of paths
+ * @return {object} no retruns
+ */
 function _resolveAll (paths) {
-  // console.log(idt(1 + 2), '#_resolveAll', str(paths));
+  // console.log('   ', '#_resolveAll', str(paths));
   let ret = [];
   for (let i = 0, len = paths.length; i < len; i++) {
     ret.push(_resolve(paths[i], this._root));
