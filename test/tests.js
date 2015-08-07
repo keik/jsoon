@@ -14,6 +14,10 @@ var obj = [
     name: 'Alice',
     age: 40,
     gender: 'female',
+    address: {
+      zipcode: '000-0000',
+      country: 'us'
+    },
     children: [
       {
         name: 'Bob',
@@ -45,7 +49,11 @@ var obj = [
       }, {
         name: 'Greg',
         age: 35,
-        gender: 'male'
+        gender: 'male',
+        address: {
+          zipcode: '000-0001',
+          country: 'jp'
+        }
       }
     ]
   }
@@ -106,11 +114,29 @@ describe('`root` method', function () {
 
 describe('`find` method', function () {
   describe('with single parameter', function () {
-    it('returns descendants of each object in current filtered by `key`', function () {
+    it('returns descendants of each object in current filtered by `key` of no object', function () {
       var $$obj = jsoon(obj);
 
       assert.equal(str($$obj.find('name').val()),
                    str(['Alice', 'Bob', 'Carol', 'Dave', 'Elen', 'Fred', 'Greg']));
+    });
+    it('returns descendants of each object in current filtered by `key` of object)', function () {
+      var $$obj = jsoon(obj);
+
+      assert.equal(str($$obj.find('address').val()),
+                   str([obj[0].address, obj[1].children[1].address]));
+    });
+    it('returns descendants of each object in current filtered by `key` of array)', function () {
+      var $$obj = jsoon(obj);
+      assert.equal($$obj.find('children').val().length, 3);
+      assert.equal(str($$obj.find('children').val()),
+                   str([obj[0].children, obj[1].children, obj[1].children[0].children]));
+    });
+    it('returns descendants of each object with duplicated-freed form', function () {
+      var $$obj = jsoon(obj);
+
+      assert.equal(str($$obj.find('children').eq(1).find('name').val()),
+                   str(['Elen', 'Fred', 'Greg']));
     });
   });
   describe('with multiple parameters', function () {
@@ -167,58 +193,75 @@ describe('`first` and `last` method', function () {
 
 describe('`parent` method', function () {
   it('returns object at the each of current object', function () {
-    it('', function () {
-      var $$obj = jsoon(obj);
+    var $$obj = jsoon(obj);
 
-      assert.equal($$obj.find('name').eq(0).parent().val(),
-                   obj[0]);
-    });
+    assert.equal($$obj.find('name').eq(0).parent().val()[0],
+                 obj[0]);
+  });
+});
+
+describe('`children` method', function () {
+  it('returns children objects at the each of current object', function () {
+    var $$obj = jsoon(obj);
+
+    assert.equal(str($$obj.find('address').children().val()),
+                 str(['000-0000', 'us', '000-0001', 'jp']));
+  });
+  it('returns children objects at the each of current object', function () {
+    var $$obj = jsoon(obj);
+
+    assert.equal(str($$obj.find('address').children('zipcode').val()),
+                 str(['000-0000', '000-0001']));
   });
 });
 
 describe('inner method', function () {
   describe('`_resolve` returns specific objects', function () {
-    it('1', function () {
-      var ret = jsoon._resolve(['name'], obj[0]);
-      assert.equal(ret, 'Alice');
+    var $$obj = jsoon(obj);
+
+    it('which is `string', function () {
+      assert.equal(jsoon._resolve([0, 'name'], $$obj), 'Alice');
     });
-    it('2', function () {
-      var ret = jsoon._resolve([0, 'children'], obj);
-      assert.equal(ret, obj[0].children);
+    it('which is `array`', function () {
+      assert.equal(jsoon._resolve([0, 'children'], $$obj), obj[0].children);
     });
-    it('3', function () {
-      var ret = jsoon._resolve([1, 'children', 0, 'name'], obj);
-      assert.equal(ret, 'Elen');
-    });
-    it('4', function () {
-      var ret = jsoon._resolve([1, 'children', 1, 'gender'], obj);
-      assert.equal(ret, 'male');
+    it('which is `object`', function () {
+      assert.equal(jsoon._resolve([0, 'address'], $$obj), obj[0].address);
     });
   });
   describe('`_resolveAll` returns specific objects', function () {
     it('1', function () {
       var $$obj = jsoon(obj),
-          ret = jsoon._resolveAll.apply($$obj, [[
-            [0, 'name']
-          ]]);
+          ret = jsoon._resolveAll([[0, 'name']], $$obj);
 
       assert.equal(str(ret), str(['Alice']));
     });
     it('2', function () {
       var $$obj = jsoon(obj),
-          ret = jsoon._resolveAll.apply($$obj, [[
-            [0, 'name'],
-            [1, 'name']
-          ]]);
+          ret = jsoon._resolveAll([[0, 'name'], [1, 'name']], $$obj);
 
       assert.equal(str(ret), str(['Alice', 'Dave']));
     });
   });
-  describe('`_uniqPaths`', function () {
+  describe('`_uniq`', function () {
     it('returns duplicate-free array', function () {
-      var ary = [[0], [1], [2, 2], [3, [3, 3]], [1], [2, 2], [3, [3, 3]]];
+      var a = [0, 1, 2, 2];
+      assert.lengthOf(jsoon._uniq(a), 3);
 
-      assert.equal(str(jsoon._uniqPaths(ary)), str([[0], [1], [2, 2], [3, [3, 3]]]));
+      var b = [0, 1, [1], [1]];
+      assert.lengthOf(jsoon._uniq(b), 3);
+
+      var c = [[0], [1], [2, 2], [3, [3, 3]], [1], [2, 2], [3, [3, 3]]];
+      assert.lengthOf(jsoon._uniq(c), 4);
+
+      var d = [['a', 'b'], ['a', 'b'], ['a', 'c']];
+      assert.lengthOf(jsoon._uniq(d), 2);
+
+      var e = [['a', 'b', ['c', 2]], ['a', 'b'], ['a', 'b', ['c', 2]]];
+      assert.lengthOf(jsoon._uniq(e), 2);
+
+      var f = [['a', {a: 1, b: {c: 1}}], ['a', 'b'], ['a', {a: 1, b: {c: 1}}, ['a', 'b', ['c', 2]]]];
+      assert.lengthOf(jsoon._uniq(f), 3);
     });
   });
 });

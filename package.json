@@ -5,12 +5,12 @@
   "scripts": {
     "lint": "npm run eslint",
     "test": "npm run mocha",
-    "watch": "babel ./lib -d ./lib -w --blacklist strict",
+    "watch": "babel ./lib/jsoon.es -d ./ -w --blacklist strict",
     "build": "npm run eslint && npm run babel && npm run browserify && npm run uglify && npm run test",
     "-----": "----------------------------------------------------------------",
     "eslint": "eslint ./lib/*.es",
     "mocha": "mocha test/tests.js",
-    "babel": "babel ./lib -d ./lib --blacklist strict",
+    "babel": "babel ./lib/jsoon.es -d ./ --blacklist strict",
     "browserify": "browserify -e lib/jsoon.js -o jsoon.js -s jsoon",
     "uglify": "uglifyjs jsoon.js -o jsoon.min.js --comments"
   },
