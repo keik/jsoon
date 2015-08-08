@@ -8,7 +8,6 @@
 const DEV = true;
 
 let str = JSON.stringify;
-let parse = JSON.parse;
 
 exports = module.exports = jsoon;
 
@@ -89,6 +88,7 @@ let chainableFns = {
 
   /**
    * Get the parents of current item.
+   * @param {string} key property name which used to filter
    * @return {jsoon} myself
    */
   children: function (key) {
@@ -129,13 +129,6 @@ let chainableFns = {
   siblings: function () {
     console.log('[#siblings] of', str(this._current));
     // TODO
-
-    //_resolve
-    //_this._current
-    //
-    //each(function () {
-    //  return
-    //})
     return null;
   },
 
@@ -272,7 +265,7 @@ function _traverse (obj, fn, acc) {
  * Return value in `obj`, which resolved through `path`.
  * @private
  * @param {array.<string>} path path to access to value
- * @param {object} obj start point object to be accessed
+ * @param {jsoon} ctx context jsoon object
  * @return {object} resolved value
  */
 function _resolve (path, ctx) {
@@ -288,6 +281,7 @@ function _resolve (path, ctx) {
  * Shim for `paths.map(_resolve)`.
  * @private
  * @param {array.<string>} paths collection of paths
+ * @param {jsoon} ctx context jsoon object
  * @return {object} no retruns
  */
 function _resolveAll (paths, ctx) {
@@ -313,9 +307,9 @@ function _uniq (array) {
     var exist = false;
     var item = array[i];
 
-    var sitem = JSON.stringify(item);
+    var sitem = str(item);
     for (var j = 0, J = ret.length; j < J; j++) {
-      if (sitem === JSON.stringify(ret[j])) {
+      if (sitem === str(ret[j])) {
         exist = true;
         break;
       }
