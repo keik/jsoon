@@ -8,8 +8,8 @@
 
 var DEV = true;
 
-var str = JSON.stringify;
-var parse = JSON.parse;
+var str = JSON.stringify,
+    parse = JSON.parse;
 
 exports = module.exports = jsoon;
 
@@ -77,6 +77,7 @@ var chainableFns = {
   parent: function parent() {
     console.log('[#parent] of', str(this._paths));
     var current = this._paths;
+
     for (var i = 0, len = current.length; i < len; i++) {
       current[i].pop();
     }
@@ -93,6 +94,7 @@ var chainableFns = {
   children: function children(key) {
     console.log('[#children] of', str(this._paths), 'filtered by', key);
     var found = [];
+
     for (var i = 0, len = this._paths.length; i < len; i++) {
 
       // clone to preserve original
@@ -101,6 +103,7 @@ var chainableFns = {
         for (var k in v) {
           if (v.hasOwnProperty(k)) {
             var path = this._paths[i].join('@') + '@';
+
             // when `key` specified, filter property
             if (typeof key === 'string') {
               if (k === key) {
@@ -226,6 +229,7 @@ var _loop2 = function (key) {
       // Chainable methods must not have side effect to myself
       // so create a new clone and return one.
       var cloned = jsoon();
+
       cloned._root = this._root;
       cloned._paths = this._paths;
 
@@ -241,15 +245,14 @@ for (var key in chainableFns) {
 function _each(paths, fn) {
   console.log('   ', '(#_each)', 'for', str(paths));
   var len = paths.length;
+
   if (!len) {
-    return fn(paths);
+    fn(paths);
   }
 
-  var ret = [];
   for (var i = 0; i < len; i++) {
     fn(paths[i]);
   }
-  return ret;
 }
 
 /**
@@ -263,8 +266,9 @@ function _traverse(obj, fn, acc) {
   console.log('   ', '(#_traverse)', 'to', str(obj), 'with', str(acc));
   for (var k in obj) {
     if (obj.hasOwnProperty(k)) {
-      var v = obj[k];
-      var ret = fn(k, v, acc);
+      var v = obj[k],
+          ret = fn(k, v, acc);
+
       if (typeof v === 'object') {
         _traverse(v, fn, ret);
       }
@@ -282,6 +286,7 @@ function _traverse(obj, fn, acc) {
 function _resolve(path, ctx) {
   console.log('   ', '(#_resolve)', str(path));
   var ret = ctx._root;
+
   for (var i = 0, len = path.length; i < len; i++) {
     ret = ret[path[i]];
   }
@@ -297,10 +302,12 @@ function _resolve(path, ctx) {
  */
 function _resolveAll(paths, ctx) {
   console.log('   ', '(#_resolveAll)', str(paths));
-  var len = paths.length;
+
+  var len = paths.length,
+      ret = [];
+
   if (!len) return ctx._root;
 
-  var ret = [];
   for (var i = 0, _len = paths.length; i < _len; i++) {
     ret.push(_resolve(paths[i], ctx));
   }
