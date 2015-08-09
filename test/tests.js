@@ -97,7 +97,7 @@ describe('methods', function () {
 });
 
 describe('`val` method', function () {
-  describe('returns current value', function () {
+  it('returns current value', function () {
     var $$obj = jsoon(obj);
 
     assert.equal($$obj.val(), obj);
@@ -219,6 +219,9 @@ describe('inner method', function () {
   describe('`_resolve` returns specific objects', function () {
     var $$obj = jsoon(obj);
 
+    it('which is `string', function () {
+      assert.equal(jsoon._resolve([], $$obj), obj);
+    });
     it('which is `string', function () {
       assert.equal(jsoon._resolve([0, 'name'], $$obj), 'Alice');
     });

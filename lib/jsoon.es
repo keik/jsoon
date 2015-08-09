@@ -8,6 +8,7 @@
 const DEV = true;
 
 let str = JSON.stringify;
+let parse = JSON.parse;
 
 exports = module.exports = jsoon;
 
@@ -24,7 +25,7 @@ function jsoon (json) {
   }
 
   this._root = json;
-  this._current = [];
+  this._paths = [];
 
   return this;
 }
@@ -41,10 +42,7 @@ let unchainableFns = {
    * @return {*} value
    */
   val: function () {
-    if (this._current.length === 0)
-      return this._root;
-    // console.log('  ', '#val', str(this._current));
-    return _resolveAll(this._current, this);
+    return _resolveAll(this._paths, this);
   }
 
 };
@@ -66,8 +64,8 @@ let chainableFns = {
    * @return {jsoon} myself
    */
   root: function () {
-    console.log('[#root] from', this._current);
-    this._current = [];
+    console.log('[#root] from', this._paths);
+    this._paths = [];
     return this;
   },
 
@@ -76,13 +74,13 @@ let chainableFns = {
    * @return {jsoon} myself
    */
   parent: function () {
-    console.log('[#parent] of', str(this._current));
-    let current = this._current;
+    console.log('[#parent] of', str(this._paths));
+    let current = this._paths;
     for (let i = 0, len = current.length; i < len; i++) {
       current[i].pop();
     }
 
-    this._current = _uniq(this._current);
+    this._paths = _uniq(this._paths);
     return this;
   },
 
@@ -92,16 +90,16 @@ let chainableFns = {
    * @return {jsoon} myself
    */
   children: function (key) {
-    console.log('[#children] of', str(this._current), 'filtered by', key);
+    console.log('[#children] of', str(this._paths), 'filtered by', key);
     let found = [];
-    for (let i = 0, len = this._current.length; i < len; i++) {
+    for (let i = 0, len = this._paths.length; i < len; i++) {
 
       // clone to preserve original
-      let v = _resolve(this._current[i], this);
+      let v = _resolve(this._paths[i], this);
       if (typeof v === 'object') {
         for (let k in v) {
           if (v.hasOwnProperty(k)) {
-            let path = this._current[i].join('@') + '@';
+            let path = this._paths[i].join('@') + '@';
             // when `key` specified, filter property
             if (typeof key === 'string') {
               if (k === key) {
@@ -119,7 +117,7 @@ let chainableFns = {
         }
       }
     }
-    this._current = _uniq(found);
+    this._paths = _uniq(found);
     return this;
   },
 
@@ -127,7 +125,7 @@ let chainableFns = {
    * @return {jsoon} myself
    */
   siblings: function () {
-    console.log('[#siblings] of', str(this._current));
+    console.log('[#siblings] of', str(this._paths));
     // TODO
     return null;
   },
@@ -138,51 +136,40 @@ let chainableFns = {
    * @return {jsoon} myself
    */
   find: function (key) {
-    console.log('[#find] for', key, this._current);
-    let keys = key.split(/,/),
-        founds = [];
+    console.log('[#find] for', key, str(this._paths));
+    let _self = this,
+        currentPaths = parse(str(this._paths)),
+        keys = key.split(/,/);
+
+    this._paths = [];
 
     for (let i = 0, len = keys.length; i < len; i++) {
       let key = keys[i].trim();
-      if (this._current.length === 0) {
-        let obj = this._root;
 
-        var currentPath = this._current.join('@');
+      _each(currentPaths, function (path) {
+        console.log('   ', ' [#find] _each', 'path:', str(path));
+
+        let obj = _resolve(path, _self),
+            currentPath = parse(str(path));
+
         _traverse(obj, function (k, v, acc) {
-          console.log('   ', ' [#find] traversing', str(k), ':', str(v));
+          console.log('   ', ' [#_find] traversing', str(k), ':', str(v));
 
-          acc += k;
+          // clone to preserve original
+          acc = parse(str(acc));
+          acc.push(k);
           if (k === key) {
-            console.log('   ', '  [#find] push', acc, 'to', str(founds));
-            founds.push(acc.split('@'));
+            console.log('   ', '  [#_find] push', str(acc), 'to', str(_self._paths));
+            _self._paths.push(acc);
           }
-          return acc + '@';
+          return acc;
         }, currentPath);
-
-
-      } else {
-        console.log(' ', '#2(_traverse)', this._current);
-        for (let i = 0, len = this._current.length; i < len; i++) {
-
-          let obj = _resolve(this._current[i], this);
-          let currentPath = this._current[i].join('@') + '@';
-          _traverse(obj, function (k, v, acc) {
-            console.log('   ', ' [#find] traversing', str(k), ':', str(v));
-
-            acc += k;
-            if (k === key) {
-              console.log('   ', '  [#find] push', acc, 'to', str(founds));
-              founds.push(acc.split('@'));
-            }
-            return acc + '@';
-          }, currentPath);
-
-        }
-
-      }
+      });
     }
 
-    this._current = _uniq(founds);
+    this._paths = _uniq(this._paths);
+    // console.log('[#_find] $$$ paths', this._paths.reduce(function (acc, p) { return acc += '    ' + str(p) + '\n'; }, '\n'));
+
     return this;
   },
 
@@ -192,8 +179,8 @@ let chainableFns = {
    * @return {jsoon} myself
    */
   eq: function (i) {
-    console.log('[#eq]', i, 'of', str(this._current));
-    this._current = [this._current[i]];
+    console.log('[#eq]', i, 'of', str(this._paths));
+    this._paths = [this._paths[i]];
     return this;
   },
 
@@ -212,7 +199,7 @@ let chainableFns = {
    */
   last: function () {
     console.log('[#lst]');
-    return this.eq(this._current.length - 1);
+    return this.eq(this._paths.length - 1);
   },
 
   /**
@@ -234,11 +221,25 @@ for (let key in chainableFns) {
       // so create a new clone and return one.
       let cloned = jsoon();
       cloned._root = this._root;
-      cloned._current = this._current;
+      cloned._paths = this._paths;
 
       return chainableFns[key].apply(cloned, arguments);
     };
   }
+}
+
+function _each (paths, fn) {
+  console.log('   ', '(#_each)', 'for', str(paths));
+  let len = paths.length;
+  if (!len) {
+    return fn(paths);
+  }
+
+  let ret = [];
+  for (var i = 0; i < len; i++) {
+    fn(paths[i]);
+  }
+  return ret;
 }
 
 /**
@@ -249,7 +250,7 @@ for (let key in chainableFns) {
  * @return {undefined} no retruns
  */
 function _traverse (obj, fn, acc) {
-  console.log('   ', '(#_traverse)', 'to', str(obj), 'with', acc);
+  console.log('   ', '(#_traverse)', 'to', str(obj), 'with', str(acc));
   for (let k in obj) {
     if (obj.hasOwnProperty(k)) {
       let v = obj[k];
@@ -286,6 +287,10 @@ function _resolve (path, ctx) {
  */
 function _resolveAll (paths, ctx) {
   console.log('   ', '(#_resolveAll)', str(paths));
+  let len = paths.length;
+  if (!len)
+    return ctx._root;
+
   let ret = [];
   for (let i = 0, len = paths.length; i < len; i++) {
     ret.push(_resolve(paths[i], ctx));
@@ -301,6 +306,7 @@ function _resolveAll (paths, ctx) {
  * @returns {array} duplicate-freed array
  */
 function _uniq (array) {
+  console.log('   ', '(#_uniq)', 'with', str(array));
   var ret = [];
 
   for (var i = 0, I = array.length; i < I; i++) {
