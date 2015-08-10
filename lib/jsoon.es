@@ -90,7 +90,7 @@ let chainableFns = {
    */
   parent: function () {
     if (DEV) console.log('[#parent] of', str(this._paths));
-    let ret = this._paths;
+    let ret = parse(str(this._paths));
 
     for (let i = 0, len = ret.length; i < len; i++) {
       ret[i].pop();

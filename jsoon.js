@@ -61,6 +61,7 @@ var unchainableFns = {
   val: function val() {
     return _resolveAll(this._paths, this);
   }
+
 };
 
 // Merge unchainable prototype functions.
@@ -90,7 +91,7 @@ var chainableFns = {
    */
   parent: function parent() {
     if (DEV) console.log('[#parent] of', str(this._paths));
-    var ret = this._paths;
+    var ret = parse(str(this._paths));
 
     for (var i = 0, len = ret.length; i < len; i++) {
       ret[i].pop();
@@ -273,6 +274,8 @@ var _loop = function (key) {
           resolved = _resolveAll(paths, this),
           len = resolved.length;
 
+      // Chainable methods must not have side effect to myself
+      // so create a new clone and return one.
       var ret = jsoon(this._root);
       ret._paths = paths;
       ret.length = len;
