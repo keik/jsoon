@@ -5,10 +5,10 @@
 
 /* eslint strict: [0], no-loop-func: [0] */
 
-const DEV = false;
-
 let str = JSON.stringify,
     parse = JSON.parse;
+
+let debug = require('debug')('jsoon');
 
 this.module = this.module || {}; // DEV
 exports = module.exports = jsoon;
@@ -28,6 +28,7 @@ function jsoon (json) {
   this._root = json;
   this._paths = [[]];
 
+  // to be array-like
   this.length = 0;
   this.push = this._paths.push;
   this.pop = this._paths.pop;
@@ -80,7 +81,7 @@ let chainableFns = {
    * @return {jsoon} myself
    */
   root: function () {
-    if (DEV) console.log('[#root] from', this._paths);
+    debug('[#root] from', this._paths);
     return [[]];
   },
 
@@ -89,7 +90,9 @@ let chainableFns = {
    * @return {jsoon} myself
    */
   parent: function () {
-    if (DEV) console.log('[#parent] of', str(this._paths));
+    debug('[#parent] of', str(this._paths));
+
+    // clone paths to preserve original
     let ret = parse(str(this._paths));
 
     for (let i = 0, len = ret.length; i < len; i++) {
@@ -105,7 +108,7 @@ let chainableFns = {
    * @return {jsoon} myself
    */
   children: function (key = '', acc = []) {
-    if (DEV) console.log('[#children] of', str(this._paths), 'filtered by', key);
+    debug('[#children] of', str(this._paths), 'filtered by', key);
 
     let keys,
         kobj;
@@ -160,7 +163,7 @@ let chainableFns = {
    * @return {jsoon} myself
    */
   siblings: function () {
-    if (DEV) console.log('[#siblings] of', str(this._paths));
+    debug('[#siblings] of', str(this._paths));
     // TODO
     return null;
   },
@@ -171,7 +174,7 @@ let chainableFns = {
    * @return {jsoon} myself
    */
   find: function (key = '', acc = []) {
-    if (DEV) console.log('[#find] for', key, str(this._paths));
+    debug('[#find] for', key, str(this._paths));
 
     let keys,
         kobj;
@@ -225,7 +228,7 @@ let chainableFns = {
    * @return {jsoon} myself
    */
   eq: function (i) {
-    if (DEV) console.log('[#eq]', i, 'of', str(this._paths));
+    debug('[#eq]', i, 'of', str(this._paths));
     return [this._paths[i]];
   },
 
@@ -234,7 +237,7 @@ let chainableFns = {
    * @return {jsoon} myself
    */
   first: function () {
-    if (DEV) console.log('[#first]');
+    debug('[#first]');
     return [this._paths[0]];
   },
 
@@ -243,7 +246,7 @@ let chainableFns = {
    * @return {jsoon} myself
    */
   last: function () {
-    if (DEV) console.log('[#lst]');
+    debug('[#lst]');
     return [this._paths[this._paths.length - 1]];
   },
 
@@ -282,7 +285,7 @@ for (let key in chainableFns) {
 }
 
 function _each (paths, fn) {
-  if (DEV) console.log('   ', '(#_each)', 'for', str(paths));
+  debug('   ', '(#_each)', 'for', str(paths));
 
   for (let i = 0, len = paths.length; i < len; i++) {
     fn(paths[i]);
@@ -297,7 +300,7 @@ function _each (paths, fn) {
  * @return {undefined} no retruns
  */
 function _traverse (obj, fn, acc) {
-  if (DEV) console.log('   ', '(#_traverse)', 'to', str(obj), 'with', str(acc));
+  debug('   ', '(#_traverse)', 'to', str(obj), 'with', str(acc));
   for (let k in obj) {
     if (obj.hasOwnProperty(k)) {
       let v = obj[k],
@@ -318,10 +321,10 @@ function _traverse (obj, fn, acc) {
  * @return {object} resolved value
  */
 function _resolve (path, ctx) {
-  if (DEV) console.log('   ', '(#_resolve)', str(path));
+  debug('   ', '(#_resolve)', str(path));
   let ret = ctx._root;
 
-  for (var i = 0, len = path.length; i < len; i++) {
+  for (let i = 0, len = path.length; i < len; i++) {
     ret = ret[path[i]];
   }
   return ret;
@@ -335,7 +338,7 @@ function _resolve (path, ctx) {
  * @return {object} no retruns
  */
 function _resolveAll (paths, ctx) {
-  if (DEV) console.log('   ', '(#_resolveAll)', str(paths));
+  debug('   ', '(#_resolveAll)', str(paths));
 
   let len = paths.length,
       ret = [];
@@ -354,15 +357,15 @@ function _resolveAll (paths, ctx) {
  * @returns {array} duplicate-freed array
  */
 function _uniq (array) {
-  if (DEV) console.log('   ', '(#_uniq)', 'with', str(array));
-  var ret = [];
+  debug('   ', '(#_uniq)', 'with', str(array));
+  let ret = [];
 
-  for (var i = 0, I = array.length; i < I; i++) {
-    var exist = false;
-    var item = array[i];
+  for (let i = 0, I = array.length; i < I; i++) {
+    let exist = false;
+    let item = array[i];
 
-    var sitem = str(item);
-    for (var j = 0, J = ret.length; j < J; j++) {
+    let sitem = str(item);
+    for (let j = 0, J = ret.length; j < J; j++) {
       if (sitem === str(ret[j])) {
         exist = true;
         break;
@@ -375,8 +378,7 @@ function _uniq (array) {
   return ret;
 }
 
-// if (DEV) {
+// export internal function for debug (will be removed in the future)
 jsoon._resolve = _resolve;
 jsoon._resolveAll = _resolveAll;
 jsoon._uniq = _uniq;
-// }
