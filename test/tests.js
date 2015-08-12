@@ -59,6 +59,14 @@ var obj = [
   }
 ];
 
+var ALICE = obj[0],
+    BOB   = obj[0].children[0],
+    CAROL = obj[0].children[1],
+    DAVE  = obj[1],
+    ELEN  = obj[1].children[0],
+    FRED  = obj[1].children[0].children[0],
+    GREG  = obj[1].children[1];
+
 describe('module', function () {
   it('exists', function () {
     assert.ok(jsoon);
@@ -73,7 +81,10 @@ describe('methods', function () {
       'children',
       'siblings',
       'find',
+      'filter',
       'eq',
+      'first',
+      'last',
       'keys',
       'val'
     ];
@@ -88,13 +99,13 @@ describe('methods', function () {
     }
   });
 
-  //it('chainable methods have no side-effect to myself', function () {
-  //  var $$obj = jsoon(obj),
-  //      beforeVal = $$obj.find('name');
-  //
-  //  $$obj.find('name');
-  //  assert.equal(beforeVal[0], $$obj[0]);
-  //});
+  it('chainable methods have no side-effect to myself', function () {
+    var $$obj = jsoon(obj),
+        beforeVal = $$obj.find('name').root();
+
+    $$obj.find('name');
+    assert.equal(beforeVal[0], $$obj[0]);
+  });
 });
 
 describe('`val` method', function () {
@@ -182,6 +193,32 @@ describe('`find` method', function () {
   });
 });
 
+describe('`filter` method', function () {
+  it('returns objects which passes type-filter function\'s test', function () {
+    var $$obj = jsoon(obj);
+
+    var result = $$obj.find('children').filter(function (obj) {
+      return Object.prototype.toString.apply(obj) === '[object Array]';
+    });
+
+    assert.lengthOf(result, 3);
+    assert.equal(result[0], obj[0].children);
+  });
+
+  it('returns objects which passes value-filter function\'s test', function () {
+    var $$obj = jsoon(obj);
+
+    var result = $$obj.find('name').parent().filter(function (obj) {
+      return obj.gender === 'male';
+    });
+
+    // expected Bob, Dave, Fred Greg
+    assert.lengthOf(result, 4);
+    assert.sameMembers(result.val(),
+                       [BOB, DAVE, FRED, GREG]);
+  });
+});
+
 describe('`eq` method', function () {
   describe('returns object at the specified index', function () {
     it('eq(0)', function () {
@@ -239,98 +276,98 @@ describe('`children` method', function () {
                  str(['000-0000', '000-0001']));
   });
 });
+
+describe('inner method', function () {
+  describe('`_resolve` returns specific objects', function () {
+    var $$obj = jsoon(obj);
+
+    it('which is `string', function () {
+      assert.equal(jsoon._resolve([], $$obj), obj);
+    });
+    it('which is `string', function () {
+      assert.equal(jsoon._resolve([0, 'name'], $$obj), 'Alice');
+    });
+    it('which is `array`', function () {
+      assert.equal(jsoon._resolve([0, 'children'], $$obj), obj[0].children);
+    });
+    it('which is `object`', function () {
+      assert.equal(jsoon._resolve([0, 'address'], $$obj), obj[0].address);
+    });
+  });
+  describe('`_resolveAll` returns specific objects', function () {
+    it('1', function () {
+      var $$obj = jsoon(obj),
+          ret = jsoon._resolveAll([[0, 'name']], $$obj);
+
+      assert.equal(str(ret), str(['Alice']));
+    });
+    it('2', function () {
+      var $$obj = jsoon(obj),
+          ret = jsoon._resolveAll([[0, 'name'], [1, 'name']], $$obj);
+
+      assert.equal(str(ret), str(['Alice', 'Dave']));
+    });
+  });
+  describe('`_uniq`', function () {
+    it('returns duplicate-free array', function () {
+      var a = [0, 1, 2, 2];
+      assert.lengthOf(jsoon._uniq(a), 3);
+
+      var b = [0, 1, [1], [1]];
+      assert.lengthOf(jsoon._uniq(b), 3);
+
+      var c = [[0], [1], [2, 2], [3, [3, 3]], [1], [2, 2], [3, [3, 3]]];
+      assert.lengthOf(jsoon._uniq(c), 4);
+
+      var d = [['a', 'b'], ['a', 'b'], ['a', 'c']];
+      assert.lengthOf(jsoon._uniq(d), 2);
+
+      var e = [['a', 'b', ['c', 2]], ['a', 'b'], ['a', 'b', ['c', 2]]];
+      assert.lengthOf(jsoon._uniq(e), 2);
+
+      var f = [['a', {a: 1, b: {c: 1}}], ['a', 'b'], ['a', {a: 1, b: {c: 1}}, ['a', 'b', ['c', 2]]]];
+      assert.lengthOf(jsoon._uniq(f), 3);
+    });
+  });
+});
+
+// describe('`siblings` method', function () {
+//   describe('returns siblings of each object in current', function () {
+//     it('x', function () {
+//       var obj = {a: 1},
+//           $$obj = jsoon(obj);
 //
-//describe('inner method', function () {
-//  describe('`_resolve` returns specific objects', function () {
-//    var $$obj = jsoon(obj);
+//       assert.equal($$obj.find(obj).siblings().obj(), null);
+//     });
+//     it('x', function () {
+//       var obj = {a: 1, b: 1},
+//           $$obj = jsoon(obj);
 //
-//    it('which is `string', function () {
-//      assert.equal(jsoon._resolve([], $$obj), obj);
-//    });
-//    it('which is `string', function () {
-//      assert.equal(jsoon._resolve([0, 'name'], $$obj), 'Alice');
-//    });
-//    it('which is `array`', function () {
-//      assert.equal(jsoon._resolve([0, 'children'], $$obj), obj[0].children);
-//    });
-//    it('which is `object`', function () {
-//      assert.equal(jsoon._resolve([0, 'address'], $$obj), obj[0].address);
-//    });
-//  });
-//  describe('`_resolveAll` returns specific objects', function () {
-//    it('1', function () {
-//      var $$obj = jsoon(obj),
-//          ret = jsoon._resolveAll([[0, 'name']], $$obj);
+//       assert.equal($$obj.find(obj).siblings().obj(), null);
+//     });
+//     it('x', function () {
+//       var obj = {a: 1, b: 1, c: [{d: 1}]},
+//           $$obj = jsoon(obj);
 //
-//      assert.equal(str(ret), str(['Alice']));
-//    });
-//    it('2', function () {
-//      var $$obj = jsoon(obj),
-//          ret = jsoon._resolveAll([[0, 'name'], [1, 'name']], $$obj);
+//       assert.equal($$obj.find(obj).siblings().obj(), null);
+//     });
+//     it('x', function () {
+//       var obj = [{a: 1}, {b: 1}],
+//           $$obj = jsoon(obj);
 //
-//      assert.equal(str(ret), str(['Alice', 'Dave']));
-//    });
-//  });
-//  describe('`_uniq`', function () {
-//    it('returns duplicate-free array', function () {
-//      var a = [0, 1, 2, 2];
-//      assert.lengthOf(jsoon._uniq(a), 3);
+//       assert.equal($$obj.find(obj[0]).siblings().obj(), [obj[1]]);
+//     });
+//     it('x', function () {
+//       var obj = [{a: 1}, {b: 1}, {c: 1}, {d: 1}],
+//           $$obj = jsoon(obj);
 //
-//      var b = [0, 1, [1], [1]];
-//      assert.lengthOf(jsoon._uniq(b), 3);
+//       assert.equal($$obj.find(obj[0]).siblings().obj(), [obj[1], obj[2], obj[3]]);
+//     });
+//     it('x', function () {
+//       var obj = [{a: 1}, {b: [{c: 1}, {d: 1}]}],
+//           $$obj = jsoon(obj);
 //
-//      var c = [[0], [1], [2, 2], [3, [3, 3]], [1], [2, 2], [3, [3, 3]]];
-//      assert.lengthOf(jsoon._uniq(c), 4);
-//
-//      var d = [['a', 'b'], ['a', 'b'], ['a', 'c']];
-//      assert.lengthOf(jsoon._uniq(d), 2);
-//
-//      var e = [['a', 'b', ['c', 2]], ['a', 'b'], ['a', 'b', ['c', 2]]];
-//      assert.lengthOf(jsoon._uniq(e), 2);
-//
-//      var f = [['a', {a: 1, b: {c: 1}}], ['a', 'b'], ['a', {a: 1, b: {c: 1}}, ['a', 'b', ['c', 2]]]];
-//      assert.lengthOf(jsoon._uniq(f), 3);
-//    });
-//  });
-//});
-//
-//// describe('`siblings` method', function () {
-////   describe('returns siblings of each object in current', function () {
-////     it('x', function () {
-////       var obj = {a: 1},
-////           $$obj = jsoon(obj);
-////
-////       assert.equal($$obj.find(obj).siblings().obj(), null);
-////     });
-////     it('x', function () {
-////       var obj = {a: 1, b: 1},
-////           $$obj = jsoon(obj);
-////
-////       assert.equal($$obj.find(obj).siblings().obj(), null);
-////     });
-////     it('x', function () {
-////       var obj = {a: 1, b: 1, c: [{d: 1}]},
-////           $$obj = jsoon(obj);
-////
-////       assert.equal($$obj.find(obj).siblings().obj(), null);
-////     });
-////     it('x', function () {
-////       var obj = [{a: 1}, {b: 1}],
-////           $$obj = jsoon(obj);
-////
-////       assert.equal($$obj.find(obj[0]).siblings().obj(), [obj[1]]);
-////     });
-////     it('x', function () {
-////       var obj = [{a: 1}, {b: 1}, {c: 1}, {d: 1}],
-////           $$obj = jsoon(obj);
-////
-////       assert.equal($$obj.find(obj[0]).siblings().obj(), [obj[1], obj[2], obj[3]]);
-////     });
-////     it('x', function () {
-////       var obj = [{a: 1}, {b: [{c: 1}, {d: 1}]}],
-////           $$obj = jsoon(obj);
-////
-////       assert.equal($$obj.find(obj[0]).siblings().obj(), [obj[1]]);
-////     });
-////   });
-//// });
+//       assert.equal($$obj.find(obj[0]).siblings().obj(), [obj[1]]);
+//     });
+//   });
+// });

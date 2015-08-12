@@ -230,6 +230,25 @@ var chainableFns = {
   },
 
   /**
+   * Filter current objects by whether or not to pass specific function test.
+   * @param {function} fn test function to filter, invoked per iteration of current objects
+   * @returns {array.<object>} filtered object
+   */
+  filter: function filter(fn) {
+    var ret = [],
+        _self = this,
+        currentPaths = parse(str(this._paths));
+
+    _each(currentPaths, function (path) {
+      var v = _resolve(path, _self),
+          currentPath = parse(str(path));
+      if (fn(v)) ret.push(currentPath);
+    }, currentPaths);
+
+    return ret;
+  },
+
+  /**
    * Filter children expect for specified index.
    * @param {number} i index
    * @return {jsoon} myself
