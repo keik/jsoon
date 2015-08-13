@@ -1,7 +1,6 @@
 {
   "name": "jsoon",
-  "main": "jsoon.js",
-  "version": "0.0.0",
+  "main": "./dist/jsoon.js",
   "homepage": "https://github.com/keik/jsoon",
   "authors": [
     "keik <k4t0.kei@gmail.com>"
@@ -20,6 +19,9 @@
     "bower_components",
     "test",
     "lib",
+    "example",
+    "package.json",
+    "src",
     "index.js"
   ]
 }

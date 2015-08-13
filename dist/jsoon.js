@@ -412,6 +412,7 @@ function _uniq(array) {
 jsoon._resolve = _resolve;
 jsoon._resolveAll = _resolveAll;
 jsoon._uniq = _uniq;
+
 },{"debug":2}],2:[function(require,module,exports){
 
 /**
