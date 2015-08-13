@@ -146,7 +146,7 @@ describe('`find` method', function () {
       var $$obj = jsoon(obj);
 
       assert.equal(str($$obj.find('address').val()),
-                   str([obj[0].address, obj[1].children[1].address]));
+                   str([ALICE.address, GREG.address]));
     });
     it('returns no object when `key` is not exist', function () {
       var $$obj = jsoon(obj);
@@ -158,7 +158,7 @@ describe('`find` method', function () {
       var $$obj = jsoon(obj);
       assert.equal($$obj.find('children').val().length, 3);
       assert.equal(str($$obj.find('children').val()),
-                   str([obj[0].children, obj[1].children, obj[1].children[0].children]));
+                   str([ALICE.children, DAVE.children, ELEN.children]));
     });
     it('returns descendants of each object with duplicated-freed form', function () {
       var $$obj = jsoon(obj);
@@ -188,7 +188,7 @@ describe('`find` method', function () {
       var $$obj = jsoon(obj);
 
       assert.equal($$obj.find(obj[0].children[0]).val()[0],
-                   obj[0].children[0]);
+                   BOB);
     });
   });
 });
@@ -202,7 +202,7 @@ describe('`filter` method', function () {
     });
 
     assert.lengthOf(result, 3);
-    assert.equal(result[0], obj[0].children);
+    assert.equal(result[0], ALICE.children);
   });
 
   it('returns objects which passes value-filter function\'s test', function () {
@@ -258,7 +258,7 @@ describe('`parent` method', function () {
     var $$obj = jsoon(obj);
 
     assert.equal($$obj.find('name').eq(0).parent().val()[0],
-                 obj[0]);
+                 ALICE);
   });
 });
 
@@ -288,10 +288,10 @@ describe('inner method', function () {
       assert.equal(jsoon._resolve([0, 'name'], $$obj), 'Alice');
     });
     it('which is `array`', function () {
-      assert.equal(jsoon._resolve([0, 'children'], $$obj), obj[0].children);
+      assert.equal(jsoon._resolve([0, 'children'], $$obj), ALICE.children);
     });
     it('which is `object`', function () {
-      assert.equal(jsoon._resolve([0, 'address'], $$obj), obj[0].address);
+      assert.equal(jsoon._resolve([0, 'address'], $$obj), ALICE.address);
     });
   });
   describe('`_resolveAll` returns specific objects', function () {
