@@ -5,13 +5,12 @@
 
 /* eslint strict: [0], no-loop-func: [0] */
 
+export default jsoon;
+
 let str = JSON.stringify,
     parse = JSON.parse;
 
 let debug = require('debug')('jsoon');
-
-this.module = this.module || {}; // DEV
-exports = module.exports = jsoon;
 
 /**
  * Return `jsoon` object which has several methods to query / manipulate / traverse.

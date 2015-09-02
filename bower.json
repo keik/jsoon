@@ -17,9 +17,9 @@
     "**/.*",
     "node_modules",
     "bower_components",
-    "test",
+    "tests",
     "lib",
-    "example",
+    "examples",
     "package.json",
     "src",
     "index.js"
